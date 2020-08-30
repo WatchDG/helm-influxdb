@@ -1,0 +1,16 @@
+namespace: influxdb
+application: influxdb
+image: influxdb:1.8-alpine
+volume: /var/lib/influxdb
+# ---
+storage:
+  size: 10Gi
+# ---
+database: influxdb
+users:
+  admin:
+    name: admin
+    password: admin
+  user:
+    name: user
+    password: user

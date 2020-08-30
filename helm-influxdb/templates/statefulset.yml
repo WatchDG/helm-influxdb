@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.application }}
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.application }}
+  serviceName: {{ .Values.application }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.application }}
+    spec:
+      volumes:
+        - name: {{ .Values.application }}-config
+          configMap:
+            name: {{ .Values.application }}
+      containers:
+        - name: influxdb
+          image: {{ .Values.image }}
+          ports:
+            - containerPort: 8086
+          envFrom:
+            - secretRef:
+                name: {{ .Values.application }}
+          volumeMounts:
+            - mountPath: {{ .Values.volume }}
+              name: {{ .Values.application }}-data
+            - mountPath: /etc/influxdb/influxdb.conf
+              name: {{ .Values.application }}-config
+              subPath: influxdb.conf
+  volumeClaimTemplates:
+    - metadata:
+        name: {{ .Values.application }}-data
+        namespace: {{ .Values.namespace }}
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.storage.size }}
